@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/ravydv/interpreter-in-go/evaluator"
 	"github.com/ravydv/interpreter-in-go/lexer"
+	"github.com/ravydv/interpreter-in-go/object"
 	"github.com/ravydv/interpreter-in-go/parser"
 )
 
@@ -14,7 +16,7 @@ const PROMPT = ">> "
 // Start Read, Eval, Print, Loop
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-
+	env := object.NewEnvironment()
 	for {
 		fmt.Printf(PROMPT)
 		scanned := scanner.Scan()
@@ -32,8 +34,11 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(program, env)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
